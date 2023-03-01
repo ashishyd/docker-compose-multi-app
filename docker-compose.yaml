@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+  mongodb:
+    image: 'mongo'
+    # container_name: mongodb
+    volumes:
+      - data:/data/db # using - as it is single value
+    env_file:
+      - ./env/mongo.env # using - as it is single value
+  backend:
+    build: ./backend
+    # long way to build
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     some-args: 1
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+volumes:
+  data:
+  logs:
